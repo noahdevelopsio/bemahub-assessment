@@ -9,6 +9,7 @@ import { useAuthStore, getStoredToken } from "@/lib/auth/authStore";
 import { formatMoney } from "@/lib/format";
 import { StatusMessage } from "@/components/StatusMessage";
 import type { Earnings } from "@/lib/types/api";
+import { WithdrawalForm } from "./WithdrawalForm";
 
 export default function EarningsPage() {
   const router = useRouter();
@@ -198,6 +199,12 @@ export default function EarningsPage() {
             </p>
           </div>
         </div>
+
+        <WithdrawalForm 
+          availableMinor={data.availableMinor}
+          minimumWithdrawalMinor={data.minimumWithdrawalMinor}
+          currency={data.currency}
+        />
       </div>
     );
   }
