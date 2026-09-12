@@ -6,16 +6,24 @@
 ## 5.1 Investigate — NULL vs 0
 
 ```sql
--- your query
+SELECT title, enrolment_count, average_rating FROM wp_bl_courses;
 ```
 
 ```
--- output
+mysql: [Warning] Using a password on the command line interface can be insecure.
+title	enrolment_count	average_rating
+Introduction to Bread Baking	128	4.60
+Sourdough Starters	64	4.20
+Pastry Fundamentals	NULL	NULL
+Cake Decorating Basics	9	0.00
+Advanced Laminated Dough	0	NULL
 ```
 
 **Which rows are genuinely 0, and which are NULL?**
+"Cake Decorating Basics" has a genuine `0.00` rating. "Advanced Laminated Dough" has a genuine `0` enrolment count. "Pastry Fundamentals" is entirely `NULL` for both fields.
 
 **Why does this matter to a user?** (two sentences)
+A genuine rating of `0.00` means users actually took the course and rated it terribly (zero stars), whereas a `NULL` rating means nobody has rated it yet. Displaying `NULL` as `0.00` on the frontend would unfairly penalize a brand-new, untested course by making it look awful.
 
 ## 5.2 The constraint
 
@@ -77,11 +85,26 @@ ERROR 1062 (23000) at line 1: Duplicate entry '2-ref_duplicate' for key 'wp_bl_w
 ## 5.3 The join
 
 ```sql
--- your query
+SELECT 
+  c.title,
+  COUNT(e.id) AS non_refunded_enrolments,
+  COALESCE(SUM(e.amount_paid_minor), 0) AS non_refunded_revenue
+FROM wp_bl_courses c
+LEFT JOIN wp_bl_enrolments e 
+  ON c.id = e.course_id 
+  AND e.refunded_at IS NULL
+GROUP BY c.id, c.title;
 ```
 
 ```
--- output
+mysql: [Warning] Using a password on the command line interface can be insecure.
+title	non_refunded_enrolments	non_refunded_revenue
+Introduction to Bread Baking	2	9000
+Sourdough Starters	0	0
+Pastry Fundamentals	0	0
+Cake Decorating Basics	0	0
+Advanced Laminated Dough	0	0
 ```
 
 **Which join type did you use, and what would break with the other one?**
+I used a `LEFT JOIN` (filtering `e.refunded_at IS NULL` directly in the `ON` clause). If I had used an `INNER JOIN` (or placed the filter in the `WHERE` clause instead), any course with zero enrolments (or only refunded enrolments) would completely vanish from the results, violating the requirement that "Courses with zero enrolments must still appear".
