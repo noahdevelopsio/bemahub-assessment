@@ -1,0 +1,50 @@
+--- Defect 1: Permission (GET /me/earnings) ---
+Request:
+curl -i -H "Authorization: Bearer <redacted>" http://localhost:8080/wp-json/bemalearn/v1/me/earnings
+
+Response:
+HTTP/1.1 403 Forbidden
+Date: Sat, 12 Sep 2026 16:48:57 GMT
+Server: Apache/2.4.67 (Debian)
+Content-Type: application/json; charset=UTF-8
+
+{"code":"forbidden","message":"Instructors only.","data":{"status":403}}
+
+
+--- Defect 2: Schema (GET /courses/1) ---
+Request:
+curl -i http://localhost:8080/wp-json/bemalearn/v1/courses/1
+
+Response:
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 16:48:57 GMT
+Server: Apache/2.4.67 (Debian)
+Content-Type: application/json; charset=UTF-8
+
+{"id":1,"title":"Introduction to Bread Baking","instructorName":"Ada Okafor","priceMinor":4500,"currency":"NGN","enrolmentCount":128,"averageRating":4.6,"publishedAt":"2026-03-14T08:00:00+00:00","isPublished":true,"description":"Introduction to Bread Baking - a short course for the assessment environment.","lessonCount":12}
+
+
+--- Defect 3: API Contract (GET /courses) ---
+Request:
+curl -i http://localhost:8080/wp-json/bemalearn/v1/courses
+
+Response:
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 16:48:57 GMT
+Server: Apache/2.4.67 (Debian)
+Content-Type: application/json; charset=UTF-8
+
+{"courses":[{"id":4,"title":"Cake Decorating Basics","instructorName":"Ada Okafor","priceMinor":3000,"currency":"NGN","enrolmentCount":9,"averageRating":0,"publishedAt":"2026-06-11T08:00:00+00:00","isPublished":true},{"id":3,"title":"Pastry Fundamentals","instructorName":"Ada Okafor","priceMinor":7500,"currency":"NGN","enrolmentCount":null,"averageRating":null,"publishedAt":"2026-05-20T08:00:00+00:00","isPublished":true},{"id":2,"title":"Sourdough Starters","instructorName":"Ada Okafor","priceMinor":6000,"currency":"NGN","enrolmentCount":64,"averageRating":4.2,"publishedAt":"2026-04-02T08:00:00+00:00","isPublished":true},{"id":1,"title":"Introduction to Bread Baking","instructorName":"Ada Okafor","priceMinor":4500,"currency":"NGN","enrolmentCount":128,"averageRating":4.6,"publishedAt":"2026-03-14T08:00:00+00:00","isPublished":true}],"previewExpiresInSeconds":300}
+
+
+--- Defect 4: Validation (POST /me/withdrawals) ---
+Request:
+curl -i -X POST -H "Authorization: Bearer <redacted>" -H "Content-Type: application/json" -d "{\"amountMinor\":1000,\"payoutReference\":\"test_123\"}" http://localhost:8080/wp-json/bemalearn/v1/me/withdrawals
+
+Response:
+HTTP/1.1 422 Unprocessable Entity
+Date: Sat, 12 Sep 2026 16:49:38 GMT
+Server: Apache/2.4.67 (Debian)
+Content-Type: application/json; charset=UTF-8
+
+{"code":"below_minimum","message":"Requested amount is below the minimum withdrawal limit.","data":{"status":422}}
