@@ -1,0 +1,14 @@
+# Successful run with real data
+$ docker run --rm -v "${PWD}/python:/app" -w /app python:3.12-slim python reconcile_earnings.py payouts.json
+Warning: skipping malformed record {'instructor_id': 11, 'amount_minor': 30000, 'status': 'paid'}: 'fee_minor'
+Warning: skipping malformed record {'instructor_id': 7, 'amount_minor': 25000, 'status': 'paid', 'fee_minor': None}: fee_minor is null
+instructor_id,total_net_minor
+7,59750
+9,79700
+
+# Run against missing file + exit code
+$ docker run --rm -v "${PWD}/python:/app" -w /app python:3.12-slim python reconcile_earnings.py missing.json
+Error reading missing.json: [Errno 2] No such file or directory: 'missing.json'
+
+$ echo $LASTEXITCODE
+2

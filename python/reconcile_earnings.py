@@ -21,8 +21,12 @@ import sys
 
 
 def load_payouts(path):
-    with open(path) as fh:
-        return json.load(fh)
+    try:
+        with open(path) as fh:
+            return json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error reading {path}: {e}", file=sys.stderr)
+        sys.exit(2)
 
 
 def summarise(payouts):
@@ -38,9 +42,18 @@ def summarise(payouts):
     totals = {}
 
     for row in payouts:
-        instructor = row["instructor_id"]
-        amount = row["amount_minor"]
-        fee = row["fee_minor"]
+        if row.get("status") != "paid":
+            continue
+
+        try:
+            instructor = row["instructor_id"]
+            amount = row["amount_minor"]
+            fee = row["fee_minor"]
+            if fee is None:
+                raise ValueError("fee_minor is null")
+        except (KeyError, ValueError) as e:
+            print(f"Warning: skipping malformed record {row}: {e}", file=sys.stderr)
+            continue
 
         net = amount - fee
 
