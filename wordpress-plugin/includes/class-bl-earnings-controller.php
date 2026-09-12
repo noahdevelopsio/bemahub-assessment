@@ -21,7 +21,7 @@ class BL_Earnings_Controller {
         register_rest_route('bemalearn/v1', '/me/earnings', [
             'methods'             => 'GET',
             'callback'            => [$this, 'get_earnings'],
-            'permission_callback' => [$this, 'check_authenticated'],
+            'permission_callback' => [$this, 'check_instructor'],
         ]);
 
         register_rest_route('bemalearn/v1', '/me/withdrawals', [
@@ -188,6 +188,14 @@ class BL_Earnings_Controller {
             return new WP_Error(
                 'insufficient_balance',
                 'Your available balance is lower than the requested amount.',
+                ['status' => 422]
+            );
+        }
+
+        if ($amount < self::MINIMUM_WITHDRAWAL_MINOR) {
+            return new WP_Error(
+                'below_minimum',
+                'Requested amount is below the minimum withdrawal limit.',
                 ['status' => 422]
             );
         }
